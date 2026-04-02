@@ -31,3 +31,36 @@ Command used:
 if you want to create a directory, use mkdir. If you want to make a file, use touch
 nano project_analysis_log.txt = takes to you to the file wou want to make edits, and if the file doesn't exist, it can creates it. 
 to save your edit ctrl + O, then press enter, then ctrl + X to exit :) 
+
+Question 2: initialize a Git repository in your project directory:
+Step 1: So basically, we are telling Git to start tracking everything inside this folder. It created “hidden” .git/ folders 
+Commands Used:
+•	Git init = start tracking the folder I created: project
+Step 2: Here we are telling git which files to track:
+Command used: 
+•	Git add . = stages all files in “project” for tracking .
+•	Git status = this is just for checking that my files are staged correctly.  
+FYI: the green files mean that they are ready to be staged. 
+Step 3: Saving my work:
+Command used:
+•	Git commit -m “I created project directory, placeholder files, and analysis log" = here I am saving my work with leaving a message of what I did. 
+
+
+Question 3: Create a github repository online:
+Step1: go to github.com
+step 2: created a new repository and called it: ibrahim-GenomicAnalysis-AnalysisReport1
+and it gave me this address where my project will be: https://github.com/deenaibrahim-coding/Ibrahim-GenomicAnalysis-AnalysisReport1.git
+
+
+Question 4: Connect your local repo to github repo:
+Step 1: connect repo: 
+Command used:
+•	Git remote add origin https://github.com/deenaibrahim-coding/Ibrahim-GenomicAnalysis-AnalysisReport1.git = connecting to github
+•	Git remote -v = to confirm if the repo is connected to git hub. 
+Step 2: Sending work to github:
+Command used:
+•	Git push -u origin main = pushing changes from my local repository to the remote repository which is github, origin is the url, and main is the branch. I ran it and it showed me an error saying that “main” does not match, probably, I used main for another repo but for this one I didn’t change it to main so it stayed as “master” which is the default. so I used this command instead: git push -v origin master.
+It asks for username for github.com so I entered mine which is deenaibrahim-coding
+Then it asked for github token, type or paste it but it will not show, so just press enter. 
+
+In order to add this modified version to github , I will type this command: git add project_analysis_log.txt then git commit -m"adding additional notes on the rest of the questions" then git push to send the work to github :)
