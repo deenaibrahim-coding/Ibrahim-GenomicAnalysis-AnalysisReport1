@@ -1,0 +1,33 @@
+
+Question 1:
+Step 1: Creating the main project folder, calling it “project”
+Command used:
+•	Mkdir project = making a folder called project
+•	Cd project = I am telling it to go to the folder. 
+•	Pwd = to show me where I am. 
+so from now on, everything must be in the “project” folder
+•	Mkdir data = making a new subfolder inside the “project” main folder and we called it “data”
+•	Ls = to check if I correctly made the “data” subfolder under  “project”
+•	Mkdir data/raw = making a folder inside data. 
+•	Ls data = to check if raw folder has been made inside data folder. If so, it will show “raw”
+•	Mkdir data/processed = same thing, we made a folder under data called “processed”
+•	Ls data = it now shows the two folders under data which are: raw and processed. 
+•	Mkdir analysis = making a folder under project.
+•	Ls = shows us the two subfolders in project which are data and analysis
+•	Mkdir analysis/fastqc = making a subfolder under analysis called fastqc
+•	Mkdir analysis/bamqc = making a subfolder under analysis called bamqc
+•	Ls analysis = it shows us that there are two subfolders under analysis called: fastqc and bamqc.
+•	Ls = shows the three subfolders under project: data, analysis, and scripts
+Step 2: Creating placeholder file using bash so Git can track it:
+Command used:
+•	Touch data/raw/.gitkeep = “touch”  creates an empty file inside data/raw to trick git in order to be able to track the folder.
+•	Touch data/processed/.gitkeep
+•	Touch analysis/fastqc/.gitkeep
+•	Touch analysis/bamqc/.gitkeep
+•	Touch scripts/.gitkeep
+Step 3: Creating a file named “project_analysis_log.txt” in the project directory, this acts as lab notebook. 
+Command used:
+•	touch project_analysis_log.txt = creating this file to record out experiments’ notes.
+if you want to create a directory, use mkdir. If you want to make a file, use touch
+nano project_analysis_log.txt = takes to you to the file wou want to make edits, and if the file doesn't exist, it can creates it. 
+to save your edit ctrl + O, then press enter, then ctrl + X to exit :) 
