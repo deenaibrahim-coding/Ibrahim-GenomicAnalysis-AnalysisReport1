@@ -63,4 +63,159 @@ Command used:
 It asks for username for github.com so I entered mine which is deenaibrahim-coding
 Then it asked for github token, type or paste it but it will not show, so just press enter. 
 
-In order to add this modified version to github , I will type this command: git add project_analysis_log.txt then git commit -m"adding additional notes on the rest of the questions" then git push to send the work to github :)
+
+In order to add this modified version to github , I will type this command: git add project_analysis_log.txt then git commit -m"adding additional notes on the rest of the questions" then git push to send the work to github 
+
+
+
+
+
+HW2: 04-14-2026_Deena Ibrahim
+
+step 1: connect to vpn on globalprotect
+
+•	Open Ubunto
+•	Enter this ssh dmi0025@10.119.6.131
+
+•	Enter your password: ib********5
+•	cd  /data/Reynolds
+•	pwd
+•	ls
+•	cd GenomicAnalysisCourse
+•	pwd
+•	ls
+•	cd HW2
+•	pwd
+•	ls
+•	okay, at this point I realized I had to go to github,
+•	click on Ibrahim-Genomic Analysis-AnalysisRepo…
+•	then click on the green botton, copy the url given 
+git clone https://github.com/deenaibrahim-coding/Ibrahim-GenomicAnalysis-AnalysisReport1.git
+•	then go to the black screen and paste it
+•	ls
+•	at this point, I should see all folders I had created .
+•	cd Ibrahim-GenomicAnalysis-AnalysisReport1 
+•	ls
+ 
+•	mkdir HW2_Deena_04142026
+•	ls
+•	 
+•	cp /data/Reynolds/GenomicAnalysisCourse/HW2/* HW2_Deena_04142026/
+•	ls HW2_Deena_04142026 
+•	 
+•	At this point, I copied the HW2 data from HPC Reynolds GenomicAnalysisCourse and I brought my HW file from github
+•	And I am working in the folder that I created in HPC and I cslled it HW2_Deena_04142026
+•	head hw2.bed
+Answer to question 1: 
+ Now, in order to extract all the intervals that have length > 500 and score > 100 we use this command: 
+awk ‘$3 - $2 > 500 && $5 >= 100’ hw2.bed
+awk = get column
+$3 = end
+$2 = start
+$5 = score
+hw2.bed = means we extracted it from hw2.bed folder/file
+And this tells it to keep only the rows that match the stated conditions. 
+It opened a huge number of rows but it doesn’t matter. At this point, we only need to save this output to a file that we will call it: hw2_intervals.bed (as instructed in the instructions) 😊
+
+Then we want to list the first few rows
+head hw2_intervals.bed
+Everything looks good 
+
+Answer to question 2:
+2-a) Okay, this question is asking to switch to .fam file.  So let;’s first look at it
+Head hw2.fam
+Let’s find duplicated IIDs only:
+cut -d' ' -f2 hw2.fam | sort | uniq -d
+o	cut = gets column 
+o	-d’  ‘ = spaces. It is important to know, because there are many columns separated by spaces, so I am telling it to look for column IID which is separated by spaces. 
+o	-f2 = take column 
+o	hw2.fam = put it in this file 
+o	sort = groups same IDs
+o	uniq -d = shows duplicates only
+o	 
+•	
+I got stuck here because I learned that -d`   ` is inaccurate spacing so the right command is: awk '{print $2}' hw2.fam | sort | uniq -d 
+   
+Now we need to print all the IID values with their full rows to a new file called hw2_duplicates.fam
+
+ 
+  
+To extract the full rows:
+awk '{print $2}' hw2.fam | sort | uniq -d > dup_ids.txt
+
+grep -F -f dup_ids.txt hw2.fam > hw2_duplicates.fam 
+
+then run head hw2_duplicates.fam to check 
+
+2-b) in order to remove duplicates from column 2 only, we used this command and save it in a file where nodups is (no duplicates)😉
+ awk '!seen[$2]++' hw2.fam > hw2_nodups.fam 
+then check 
+head hw2_nodups.fam
+
+Now, in order to count how many times each FID appears, run this command: 
+
+awk '{print $1}' hw2_nodups.fam | sort | uniq -c > hw2_FID.counts
+•	awk = because we are working with columns
+•	{print $1} = column 1
+•	$1 = FID column only. 
+•	 |  = sends the output to the next command
+•	Sort = sort it alphabetically
+•	uniq -c = find duplicates and count how many.
+•	> hw2_FID.counts = saves the output to this file
+Answers to question 3:
+3-a) 
+•	Moving to FASTA file:
+•	Looking at it: head hw2.fa 
+•	 Now we only need to grab headers that start with  > only, then save them to hw2_fasta_names.txt 
+•	grep “^>” hw2.fa > hw2_fasta_names.txt 
+
+3-b)
+In order to remove the first underscore we use this general command: 
+sed '/^>/s/_.*//' input.fasta > output.fasta 
+sed = modify text
+/^>/ = only apply to header lines that start with >
+S = substitute
+_.* = underscore and everything after
+// = replace with 
+And save it in hw2_modID.fa
+
+sed '/^>/s/_.*//' hw2.fa > hw2_modID.fa 
+
+
+ 
+Question 4: 
+we need to move to v62.0_HO_public.fam
+head v62.0_HO_public.fam
+
+4-a) Now we need to find samples from Russia (Россия) 
+grep “Russia” v62.0_HO_public.fam
+and let’s count how many samples: 
+grep "Russia" v62.0_HO_public.fam | wc -l
+ it showed 986.
+Now we need to count how many unique Russia FIDs?
+grep "Russia" v62.0_HO_public.fam | awk '{print $1}' | sort | uniq | wc -l 
+this command gets Russia rows, extract FID which is column 1, removes duplicates and count the unique ones.
+it showed 323
+ 4-b) to show FIDs from your file, type this command:
+grep "Russia" v62.0_HO_public.fam | awk '{print $1}' | sort | uniq | head 
+it is going to give you a list of Russia’s FID, at this point, I will pick one, for example Russia_Afanasievo.AG
+so here, I am going to give it a command to find all samples that belong to one population in v62.0_HO_public.fam and save it in a separate file
+grep "Russia_Afanasievo.AG" v62.0_HO_public.fam > v62_Russia_Afanasievo.AG.fam
+
+Now amazingly, I am done with the hw questions (yay), so its time to update my analysis log
+ So we must go back to my repo folder which is cd ..
+ls
+git add project_analysis_log.txt
+
+
+then commit:
+git commit -m "HW2 completed 😊"
+
+
+now let’s open my project_analysis_log.txt and add my HW2 notes. 
+nano project_analysis_log.txt 
+but because my HPC says it cannot find nano, so I will use vi or vim instead
+ 
+vi project_analysis_log.txt
+then press i to insert your new notes.
+)
