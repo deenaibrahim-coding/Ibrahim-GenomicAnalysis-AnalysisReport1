@@ -219,3 +219,107 @@ but because my HPC says it cannot find nano, so I will use vi or vim instead
 vi project_analysis_log.txt
 then press i to insert your new notes.
 )
+
+HW3 04/21/2026
+HW3 Notes
+-	Open Ubonto terminal
+-	Go to home directory on HPC 
+-	Connect to HPC: 
+ssh dmi0025@10.119.6.131
+-	Pwd = I should see  /home/dmi0025 
+And this means I am in my own workspace on HPC. 
+-	To make a new folder for HW3: 
+mkdir HW3_Deena
+cd HW3_Deena
+-	I should see /home/dmi0025/HW3_Deena
+-	Now its time to copy the fastq files into my folder:
+cp /data/Reynolds/GenomicAnalysisCourse/HW3/*.fastq.gz .
+ls =  I should see the three pairs of FASTQ files. 
+-	Don’t forget to activate conda environment: 
+conda activate /data/Reynolds/GenomicAnalysisCourse/conda_envs/course_env
+-	Fast check FASTQC files
+which fastqc
+Question 1: Create a FastQC report for each of the FASTQ files.
+
+-	Run fastQC for all the files to generate FASTQC reports.
+fastqc *.fastq.gz
+-	Ls = it should show fastqc.zip. .gz, .html
+-	Then open a new tab for your local computer terminal “not HPC” and copy those reports to your local computer 
+scp dmi0025@10.119.6.131:~/HW3_Deena/*fastqc.html .
+before, I started analyzing them, I created a folder on my local computer and called it HW3_Deena_Local_Computer and moved the .html files to it
+mv *fastqc.html HW3_Deena_Local_Computer/ 
+-	Then open the files in the browser by using the following command:
+explorer.exe .
+-	It is going to show you the files, click on each one of them and start analysis. 
+For file:  22018FL-04-01-12_S12_L002_R1_001_fastqc
+	Problems Identified:
+•	Per tile sequence Quality: There is uneven quality among tiles which could be technical issues during sequencing. 
+•	Adaptor Content: The “IIlumina Universal Adapters - Red”  are present at the end of the reads which indicates contamination.
+To fix: trimming them
+•	Per Base Sequence Content: Issues in the nucleotide sequence at the beginning of the reads. No need for corrections.
+•	Per Sequence GC content: slightly deviates from the theoretical distribution but it is a minor issue that could be due to contamination. 
+	Overall: The data is of high quality but the adaptor contamination must be removed, the minor biases are not critical. 
+	While R1 files was analyzed, its paired R2 file has the same pattern so trimming will be for the entire pair (R1 & R2) 
+For file: 22018FL-04-01-21_S21_L007_R1_001_fastqc.html
+	Problem Identified: 
+•	The following problems have been identified as warnings (yellow): Per tile sequence quality; per base sequence content; per sequence GC content. 
+•	But Adapter content is an issue that must be fixed as it shows red warning. The “IIlumina Universal Adapters - Red”  are present at the end of the reads which indicates contamination.
+For files: 22154FL-03-01-01_S1_L003_R1_001_fastqc.html:
+	Problem identified:
+•	Per base sequence quality: sharp drop after 110 bp and end of reads are vey low quality. 
+•	Per tile sequence quality:  sequence variation, trimming doesn’t work. 
+•	Per base sequence content: imbalance in nucleotides at the beginning of the reads. To fix this issue, we are going to remove the bad reads along with the adapters. 
+•	Per sequence GC content: slight shift of the read from the theoretical distribution. This warning is mainly something to note and not necessarily to correct. 
+•	Sequence duplication levels: high duplication level at >100 . Trimming will not fix this issue. We can remove duplicates using samtools command. 
+•	Overrepresented sequences: some sequences appear too frequently. 
+•	Adapter content: The “IIlumina Universal Adapters - Red”  are present at the end of the reads which indicates contamination.
+To fix: trimming them
+Question 2: Based on your analysis, perform the appropriate quality control steps to improve the FASTQ files.
+-	Go back to HPC terminal
+-	Activate conda: 
+conda activate /data/Reynolds/GenomicAnalysisCourse/conda_envs/course_env
+ then start trimming by using command: fastp -i
+
+For file:  22018FL-04-01-12_S12_L002_R1_001_fastqc and 22018FL-04-01-12_S12_L002_R2_001_fastqc
+Trimming commands for the pair of files above: go to HPC and type the following command: 
+fastp -i 22018FL-04-01-12_S12_L002_R1_001.fastq.gz -I 22018FL-04-01-12_S12_L002_R2_001.fastq.gz -o 22018FL-04-01-12_S12_L002_R1_001_trimmed.fastq.gz -O 22018FL-04-01-12_S12_L002_R2_001_trimmed.fastq.gz -w 4 
+•	Fastp = trimming tool 
+•	-I = input R1
+•	-I = input R2 
+•	-o = output R1 
+•	-O = output R2 
+•	-w 4 = use 4 threads to speed up the process. 
+
+Run fastqc again:  fastqc *trimmed.fastq.gz
+Let’s verify that timming has worked: ls *trimmed_fastqc* 
+-	Then on your local computer, copy the trimmed file by running this: 
+scp dmi0025@10.119.6.131:~/HW3_Deena/*trimmed_fastqc.html  
+-	to open the HTML and check if trimming fixed the problem: 
+explorer.exe 22018FL-04-01-12_S12_L002_R1_001_trimmed_fastqc.html 
+	
+After trimming, it shows that adapter content is green which means it is now fixed, the sequence length distribution is now showing warning (yellow) because after trimming some bases got cut off so the reading is less. It is expected but acceptable.
+
+For files: 22018FL-04-01-21_S21_L007_R1_001_fastqc and 22018FL-04-01=-21_S21_L007_R2_001_fastqc
+Let’s do FastQC to analyze the raw data:  fastqc *.fastq.gz
+Trimming command for the pair above: 
+fastp -i 22018FL-04-01-21_S21_L007_R1_001.fastq.gz -I 22018FL-04-01-21_S21_L007_R2_001.fastq.gz -o 22018FL-04-01-21_S21_L007_R1_001_trimmed.fastq.gz -O 22018FL-04-01-21_S21_L007_R2_001_trimmed.fastq.gz -w 4
+run fastqc again: fastqc -t 4 *S21*trimmed.fastq.gz
+-	Now go to the local computer terminal and copy the new trimmed files:
+scp dmi0025@10.119.6.131:~/HW3_Deena/*S21*trimmed_fastqc.html .
+then open the new  HTML files:
+explorer.exe 22018FL-04-01-21_S21_L007_R1_001_trimmed_fastqc.html
+After trimming, it shows that the adapter content is green. For the other warnings, trimming didn’t work on them but it is still good as the per base quality is high, duplication levels are ok, sequence length is now yellow but it is expected due to the removal of adapter sequences. 
+
+For files: 22154FL-03-01-01_S1_L003_R2_001_fastqc 
+Let’s do fast qc to analyze them: fastqc *.fastq.gz
+Go to HW3_deena then activate conda
+Run the trimming command for the third pair:
+fastp \
+-i 22154FL-03-01-01_S1_L003_R1_001.fastq.gz \
+-I 22154FL-03-01-01_S1_L003_R2_001.fastq.gz \
+-o 22154FL-03-01-01_S1_L003_R1_001_trimmed.fastq.gz \
+-O 22154FL-03-01-01_S1_L003_R2_001_trimmed.fastq.gz \
+-w 4
+run fastqc again: fastqc -t 4 *S1*trimmed.fastq.gz
+After trimming, the per base sequence quality, per tile sequence quality, per base sequence content, sequence duplication levels, are still showing red. But this time the GC content is red. The adapter content has been fixed. 
+
