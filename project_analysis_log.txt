@@ -321,5 +321,5 @@ fastp \
 -O 22154FL-03-01-01_S1_L003_R2_001_trimmed.fastq.gz \
 -w 4
 run fastqc again: fastqc -t 4 *S1*trimmed.fastq.gz
-After trimming, the per base sequence quality, per tile sequence quality, per base sequence content, sequence duplication levels, are still showing red. But this time the GC content is red. The adapter content has been fixed. 
+After trimming, the per base sequence quality, per tile sequence quality, per base sequence content, sequence duplication levels, are still showing red. But this time the GC content is red. The adapter content has been fixed which shows green. 
 
