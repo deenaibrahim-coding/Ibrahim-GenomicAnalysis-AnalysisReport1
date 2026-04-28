@@ -323,3 +323,134 @@ fastp \
 run fastqc again: fastqc -t 4 *S1*trimmed.fastq.gz
 After trimming, the per base sequence quality, per tile sequence quality, per base sequence content, sequence duplication levels, are still showing red. But this time the GC content is red. The adapter content has been fixed which shows green. 
 
+HW4_Deena
+Connected to HSC VPN and accessed the HPC:
+ssh dmi0025@10.119.6.131
+Navigate to directories: 
+pwd
+ls
+cd HW3_Deena
+ls *trimmed.fastq.gz
+Reference genome: 
+cd /data/Reynolds/GenomicAnalysisCourse/reference
+ls
+Created a working directory for HW4 and activated the required environment:
+mkdir HW4_Deena
+cd HW4_Deena
+conda activate /data/Reynolds/GenomicAnalysisCourse/conda_envs/course_env
+
+Alignment Sample 1 and Sample 2
+Aligned paired-end reads to the human reference genome using BWA:
+bwa mem -t 4 /data/Reynolds/GenomicAnalysisCourse/reference/hg38.fa.gz \
+~/HW3_Deena/22018FL-04-01-12_S12_L002_R1_001_trimmed.fastq.gz \
+~/HW3_Deena/22018FL-04-01-12_S12_L002_R2_001_trimmed.fastq.gz > sample1.sam
+•	bwa mem: aligns sequencing reads to the reference genome 
+•	-t 4: uses 4 CPU threads 
+•	hg38.fa.gz: human reference genome 
+•	R1/R2: paired-end reads 
+•	>: redirects output to SAM file 
+Checking for alignment 
+ls -lh
+The same process was repeated for sample 2 and 3.
+Sample 1: 
+Question 2: 
+Quality assessment was performed using Qualimap:
+qualimap bamqc -bam sample1_sorted.bam -outdir sample1_qualimap
+scp -r dmi0025@10.119.6.131:~/HW4_Deena/sample1_qualimap .
+
+Sample 1 showed alignment of 96.01% of reads successfully mapped to the reference genome. The mean coverage was about 4X, meaning it is of low sequencing depth.
+Question 3: 
+Converted SAM to BAM, sorted, and indexed:
+samtools view -b sample1.sam | samtools sort -@ 4 -o sample1_sorted.bam
+samtools index sample1_sorted.bam
+Question 4:
+Added read group information using Picard:
+picard AddOrReplaceReadGroups \
+I=sample1_sorted.bam \
+O=sample1_rg.bam \
+RGID=1 RGLB=lib1 RGPL=ILLUMINA RGPU=unit1 RGSM=sample1
+Indexed the new BAM file:
+samtools index sample1_rg.bam
+
+Question 5: 
+A SLURM script was used to mark duplicates:
+nano dup_sample1.sh
+#!/bin/bash
+#SBATCH --job-name=dup_sample1
+#SBATCH --output=dup_sample1.out
+#SBATCH --error=dup_sample1.err
+#SBATCH --time=02:00:00
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=12G
+
+
+conda activate /data/Reynolds/GenomicAnalysisCourse/conda_envs/course_env
+
+cd ~/HW4_Deena
+
+picard MarkDuplicates \
+I=sample1_rg.bam \
+O=sample1_dedup.bam \
+M=sample1_metrics.txt
+
+samtools index sample1_dedup.bam
+
+qualimap bamqc -bam sample1_dedup.bam -outdir sample1_qualimap_dedup --java-mem-size=10G
+Submitted job:
+sbatch dup_sample1.sh
+To extract duplication statistics
+less sample1_metrics.txt
+
+a) The proportion of duplicate reads was approximately 15.6% based on Picard metrics.
+b) After duplicate marking, the overall alignment metrics remained the same, but duplicate reads were identified, which improved downstream analysis. 
+
+Question 6: 
+a) The average coverage was approximately 4X, obtained from the Qualimap report (mean coverage).
+b) This low sequencing depth lead to low-confidence variant calls, as good variant detection has typical coverage of 20–30X.
+
+Sample 2
+Question 2: 
+Qualimap was used to assess the alignment quality of sample2_sorted.bam. High mapping rate of 96% of reads successfully aligned to the reference genome. The mean coverage was approximately 4X, which shows low sequencing depth within the genome.
+Question 3: 
+The SAM file was converted to BAM format, sorted, and indexed:
+samtools view -b sample2.sam | samtools sort -@ 4 -o sample2_sorted.bam
+samtools index sample2_sorted.bam
+Question 4: 
+Read groups were added using Picard:
+picard AddOrReplaceReadGroups \
+I=sample2_sorted.bam \
+O=sample2_rg.bam \
+RGID=1 RGLB=lib1 RGPL=ILLUMINA RGPU=unit1 RGSM=sample2
+
+samtools index sample2_rg.bam
+This step employs metadata to each read.
+Question 5: 
+a) The duplication rate was: 14.4% duplication which shows good library and minimal PCR duplication
+b) the overall alignment is unchanged because the duplication is minimal. 
+Question 6: 
+a) The average coverage for sample2 was about 4X, which is low sequencing depth. 
+B) Although duplication rate is low and mapping quality is high, the low coverage limits variant detection confidence.
+
+Sample 3
+Question 2: 
+Qualimap analysis of sample3_sorted.bam showed a high mapping rate of 96% mapped reads). However, the mean coverage remained approximately 4X, which is of a low sequencing depth similar to sample2.
+Question 3: 
+The SAM file was converted, sorted, and indexed using:
+samtools view -b sample3.sam | samtools sort -@ 4 -o sample3_sorted.bam
+samtools index sample3_sorted.bam
+Question 4: 
+picard AddOrReplaceReadGroups \
+I=sample3_sorted.bam \
+O=sample3_rg.bam \
+RGID=1 RGLB=lib1 RGPL=ILLUMINA RGPU=unit1 RGSM=sample3
+
+samtools index sample3_rg.bam
+Question 5: 
+a) Duplicate analysis = 97.0% 
+b) This high duplication rate means very poor library complexity that results in loss of usable data and lowering confidence in downstream analysis.
+Question 6: 
+Although sample3 shows a high mapping rate, the very high duplication rate (97%) reduces the number of unique reads. 
+ Low coverage (4X), results in poor data quality and low confidence in variant calling.
+
+
+
